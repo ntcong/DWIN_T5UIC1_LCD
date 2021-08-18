@@ -1,3 +1,4 @@
+from asyncio.tasks import sleep
 import threading
 import errno
 import select
@@ -7,7 +8,6 @@ import requests
 from requests.exceptions import ConnectionError
 from api import OctoPrintAPI, MoonrakerAPI
 import atexit
-
 
 class xyze_t:
 	x = 0.0
@@ -94,7 +94,7 @@ class material_preset_t:
 		self.fan_speed = fan_speed
 
 
-class klippySocket:
+class KlippySocket:
 	def __init__(self, uds_filename, callback=None):
 		self.webhook_socket_create(uds_filename)
 		self.lock = threading.Lock()
@@ -176,6 +176,7 @@ class klippySocket:
 
 
 class PrinterData:
+	event_loop = None
 	HAS_HOTEND = True
 	HOTENDS = 1
 	HAS_HEATED_BED = True
@@ -183,7 +184,7 @@ class PrinterData:
 	HAS_ZOFFSET_ITEM = True
 	HAS_ONESTEP_LEVELING = False
 	HAS_PREHEAT = True
-	HAS_BED_PROBE = True
+	HAS_BED_PROBE = False
 	PREVENT_COLD_EXTRUSION = True
 	EXTRUDE_MINTEMP = 170
 	EXTRUDE_MAXLENGTH = 200
@@ -212,7 +213,7 @@ class PrinterData:
 
 	buzzer = buzz_t()
 
-	BABY_Z_VAR = 3.1
+	BABY_Z_VAR = 0
 	feedrate_percentage = 100
 	temphot = 0
 	tempbed = 0
@@ -244,7 +245,7 @@ class PrinterData:
 		else:
 			self.api = OctoPrintAPI(url, port, api_key)
 		print(self.api.base_address)
-		self.ks = klippySocket('/tmp/klippy_uds', callback=self.klippy_callback)
+		self.ks = KlippySocket('/tmp/klippy_uds', callback=self.klippy_callback)
 		subscribe = {
 			"id": 4001,
 			"method": "objects/subscribe",
@@ -308,7 +309,7 @@ class PrinterData:
 			return False
 
 	def offset_z(self, new_offset):
-		print('new z offset:', new_offset)
+#		print('new z offset:', new_offset)
 		self.BABY_Z_VAR = new_offset
 		self.queue('ACCEPT')
 
