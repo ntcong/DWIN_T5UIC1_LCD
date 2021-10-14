@@ -335,6 +335,8 @@ class PrinterData:
 			return
 		self.update_variable()
 		ppp = self.api.get_printer_profile()
+		if ppp is None:
+			return None
 		self.SHORT_BUILD_VERSION = ppp['model']
 		self.MACHINE_SIZE = "{}x{}x{}".format(
 			int(ppp['volume']['depth']),

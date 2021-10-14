@@ -329,9 +329,9 @@ class DWIN_LCD:
 
 	def lcdExit(self):
 		print("Shutting down the LCD")
-		self.JPG_ShowAndCache(0)
-		self.Frame_SetDir(1)
-		self.UpdateLCD()
+		self.lcd.JPG_ShowAndCache(0)
+		self.lcd.Frame_SetDir(1)
+		self.lcd.UpdateLCD()
 		self.timer.stop()
 		GPIO.remove_event_detect(self.button_pin)
 
@@ -2211,7 +2211,7 @@ class DWIN_LCD:
 	# --------------------------------------------------------------#
 
 	def EachMomentUpdate(self):
-		# variable update
+		# variable updatget_job
 		update = self.pd.update_variable()
 		if self.last_status != self.pd.status:
 			self.last_status = self.pd.status
