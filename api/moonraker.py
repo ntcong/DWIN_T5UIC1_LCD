@@ -20,30 +20,38 @@ class MoonrakerAPI():
 				return json.loads(d)['result']
 		except json.JSONDecodeError:
 			print('Decoding JSON has failed')
+		except KeyError:
+			print(d)
 		return None
 
 	def postREST(self, path, json):
 		self.s.post(self.base_address + path, json=json)
 
 	def get_printer_info(self):
-		data = self.getREST('/printer/objects/query?extruder&heater_bed')['status']
-		state = {
-			'temperature': {
-				'bed': {
-					'actual': data['heater_bed']['temperature'],
-					'target': data['heater_bed']['target'],
-				},
-				'tool0': {
-					'actual': data['extruder']['temperature'],
-					'target': data['extruder']['target'],
+		data = self.getREST('/printer/objects/query?extruder&heater_bed')
+		if data:
+			data = data['status']
+			state = {
+				'temperature': {
+					'bed': {
+						'actual': data['heater_bed']['temperature'],
+						'target': data['heater_bed']['target'],
+					},
+					'tool0': {
+						'actual': data['extruder']['temperature'],
+						'target': data['extruder']['target'],
+					}
 				}
 			}
-		}
-		return state
+			return state
+		else:
+			return None
 
 	def get_printer_profile(self):
 		ppp = {}
 		machine_info = self.getREST('/machine/update/status?refresh=false')
+		if machine_info is None:
+			return None
 		ppp['model'] = machine_info['version_info']['klipper']['version']
 		toolhead_info = self.getREST('/printer/objects/query?toolhead')['status']['toolhead']
 		volume = toolhead_info['axis_maximum']
@@ -77,7 +85,10 @@ class MoonrakerAPI():
 		state = state_map[data['print_stats']['state']]
 		virtual_sdcard = data['virtual_sdcard']
 		print_stats = data['print_stats']
-		total_print_time = print_stats['print_duration'] / virtual_sdcard['progress']
+		if virtual_sdcard['progress']:
+			total_print_time = print_stats['print_duration'] / virtual_sdcard['progress']
+		else:
+			total_print_time = 0
 		return {
 			'job': {
 				'file': {
