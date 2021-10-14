@@ -28,7 +28,7 @@ class MoonrakerAPI():
 		self.s.post(self.base_address + path, json=json)
 
 	def get_printer_info(self):
-		data = self.getREST('/printer/objects/query?extruder&heater_bed')
+		data = self.getREST('/printer/objects/query?extruder&heater_bed&fan')
 		if data:
 			data = data['status']
 			state = {
@@ -41,7 +41,8 @@ class MoonrakerAPI():
 						'actual': data['extruder']['temperature'],
 						'target': data['extruder']['target'],
 					}
-				}
+				},
+				'fan_speed': data['fan']['speed']*100,
 			}
 			return state
 		else:

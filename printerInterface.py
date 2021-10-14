@@ -379,6 +379,12 @@ class PrinterData:
 					if self.thermalManager['temp_hotend'][0]['celsius'] != int(self.state["temperature"]["tool0"]["actual"]):
 						self.thermalManager['temp_hotend'][0]['celsius'] = int(self.state["temperature"]["tool0"]["actual"])
 						Update = True
+					
+				if self.state['fan_speed']:
+					if self.thermalManager['fan_speed'][0] != self.state['fan_speed']:
+						self.thermalManager['fan_speed'][0] = self.state['fan_speed']
+						Update = True
+					
 		self.job_Info = self.api.get_job()
 		if self.job_Info:
 			self.file_name = self.job_Info['job']['file']['name']
